@@ -84,7 +84,7 @@
 
         ms.on('focus', function(){
           that.$selectableUl.focus();
-        });
+        })
       }
 
       var selectedValues = ms.find('option:selected').map(function(){ return $(this).val(); }).get();
@@ -116,12 +116,14 @@
       selectableLi
         .data('ms-value', value)
         .addClass('ms-elem-selectable')
-        .attr('id', elementId+'-selectable');
+        .attr('id', elementId + '-selectable')
+        .attr('data-val', value);
 
       selectedLi
         .data('ms-value', value)
         .addClass('ms-elem-selection')
-        .attr('id', elementId+'-selection')
+        .attr('id', elementId + '-selection')
+        .attr('data-val', value)
         .hide();
 
       if ($option.prop('disabled') || ms.prop('disabled')){
@@ -149,22 +151,22 @@
           $selectionOptgroup.append($(optgroupTpl));
           if (that.options.selectableOptgroup){
             $selectableOptgroup.find('.ms-optgroup-label').on('click', function(){
-              var values = $optgroup.children(':not(:selected, :disabled)').map(function(){ return $(this).val();}).get();
+              var values = $optgroup.children(':not(:selected, :disabled)').map(function(){ return $(this).val() }).get();
               that.select(values);
             });
             $selectionOptgroup.find('.ms-optgroup-label').on('click', function(){
-              var values = $optgroup.children(':selected:not(:disabled)').map(function(){ return $(this).val();}).get();
+              var values = $optgroup.children(':selected:not(:disabled)').map(function(){ return $(this).val() }).get();
               that.deselect(values);
             });
           }
           that.$selectableUl.append($selectableOptgroup);
           that.$selectionUl.append($selectionOptgroup);
         }
-        index = index === undefined ? $selectableOptgroup.find('ul').children().length : index + 1;
+        index = index == undefined ? $selectableOptgroup.find('ul').children().length : index + 1;
         selectableLi.insertAt(index, $selectableOptgroup.children());
         selectedLi.insertAt(index, $selectionOptgroup.children());
       } else {
-        index = index === undefined ? that.$selectableUl.children().length : index;
+        index = index == undefined ? that.$selectableUl.children().length : index;
 
         selectableLi.insertAt(index, that.$selectableUl);
         selectedLi.insertAt(index, that.$selectionUl);
@@ -181,21 +183,13 @@
         if (option.value !== undefined && option.value !== null &&
             that.$element.find("option[value='"+option.value+"']").length === 0){
           var $option = $('<option value="'+option.value+'">'+option.text+'</option>'),
-              $container = option.nested === undefined ? that.$element : $("optgroup[label='"+option.nested+"']"),
-              index = parseInt((typeof option.index === 'undefined' ? $container.children().length : option.index));
-
-          if (option.optionClass) {
-            $option.addClass(option.optionClass);
-          }
-
-          if (option.disabled) {
-            $option.prop('disabled', true);
-          }
+              index = parseInt((typeof option.index === 'undefined' ? that.$element.children().length : option.index)),
+              $container = option.nested == undefined ? that.$element : $("optgroup[label='"+option.nested+"']")
 
           $option.insertAt(index, $container);
           that.generateLisFromOption($option.get(0), index, option.nested);
         }
-      });
+      })
     },
 
     'escapeHTML' : function(text){
@@ -337,7 +331,7 @@
       });
 
       this.$container.on('mouseleave', that.elemsSelector, function () {
-        $(this).parents('.ms-container').find(that.elemsSelector).removeClass('ms-hover');
+        $(this).parents('.ms-container').find(that.elemsSelector).removeClass('ms-hover');;
       });
     },
 
@@ -348,8 +342,7 @@
 
     'destroy' : function(){
       $("#ms-"+this.$element.attr("id")).remove();
-      this.$element.off('focus');
-      this.$element.css('position', '').css('left', '');
+      this.$element.css('position', '').css('left', '')
       this.$element.removeData('multiselect');
     },
 
@@ -539,6 +532,6 @@
         $parent.children().eq(index - 1).after(this);
       }
     });
-};
+}
 
 }(window.jQuery);
