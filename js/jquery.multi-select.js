@@ -117,13 +117,39 @@
                 .data('ms-value', value)
                 .addClass('ms-elem-selectable')
                 .attr('id', elementId + '-selectable')
-                .attr('data-val', value);
+                .attr('data-val', value)
+                .each(function () {
+                    $.each(this.attributes, function () {
+                        if (this.specified &&
+                            this.name !== "data-ng-attr-value" &&
+                            this.name !== "data-ng-repeat" &&
+                            this.name !== "data-ng-attr-selected" &&
+                            this.name !== "data-val" &&
+                            this.name !== "class" &&
+                            this.name !== "id") {
+                            selectableLi.attr(this.name, this.value);
+                        }
+                    });
+                });
 
             selectedLi
                 .data('ms-value', value)
                 .addClass('ms-elem-selection')
                 .attr('id', elementId + '-selection')
                 .attr('data-val', value)
+                .each(function () {
+                    $.each(this.attributes, function () {
+                        if (this.specified &&
+                            this.name !== "data-ng-attr-value" &&
+                            this.name !== "data-ng-repeat" &&
+                            this.name !== "data-ng-attr-selected" &&
+                            this.name !== "data-val" &&
+                            this.name !== "class" &&
+                            this.name !== "id") {
+                            selectedLi.attr(this.name, this.value);
+                        }
+                    });
+                })
                 .hide();
 
             if ($option.prop('disabled') || ms.prop('disabled')) {
