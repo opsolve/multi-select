@@ -72,11 +72,11 @@
 
                 var action = that.options.dblClick ? 'dblclick' : 'click';
 
-                that.$selectableUl.on(action, '.ms-elem-selectable', function () {
-                    that.select($(this).data('ms-value'));
+                that.$selectableUl.on(action, '.ms-elem-selectable', function (e) {
+                    that.select(e, $(this).data('ms-value'));
                 });
-                that.$selectionUl.on(action, '.ms-elem-selection', function () {
-                    that.deselect($(this).data('ms-value'));
+                that.$selectionUl.on(action, '.ms-elem-selection', function (e) {
+                    that.deselect(e, $(this).data('ms-value'));
                 });
 
                 that.activeMouse(that.$selectionUl);
@@ -88,7 +88,7 @@
             }
 
             var selectedValues = ms.find('option:selected').map(function () { return $(this).val(); }).get();
-            that.select(selectedValues, 'init');
+            that.select(null, selectedValues, 'init');
 
             if (typeof that.options.afterInit === 'function') {
                 that.options.afterInit.call(this, this.$container);
@@ -176,13 +176,13 @@
                     $selectableOptgroup.append($(optgroupTpl));
                     $selectionOptgroup.append($(optgroupTpl));
                     if (that.options.selectableOptgroup) {
-                        $selectableOptgroup.find('.ms-optgroup-label').on('click', function () {
+                        $selectableOptgroup.find('.ms-optgroup-label').on('click', function (e) {
                             var values = $optgroup.children(':not(:selected, :disabled)').map(function () { return $(this).val() }).get();
-                            that.select(values);
+                            that.select(e, values);
                         });
-                        $selectionOptgroup.find('.ms-optgroup-label').on('click', function () {
+                        $selectionOptgroup.find('.ms-optgroup-label').on('click', function (e) {
                             var values = $optgroup.children(':selected:not(:disabled)').map(function () { return $(this).val() }).get();
-                            that.deselect(values);
+                            that.deselect(e, values);
                         });
                     }
                     that.$selectableUl.append($selectableOptgroup);
@@ -372,7 +372,12 @@
             this.$element.removeData('multiselect');
         },
 
-        'select': function (value, method, quicksearchCacheOptions) {
+        'select': function (e, value, method, quicksearchCacheOptions) {
+            if (e !== null && (typeof e === 'string' || typeof e.concat === 'function')) {
+                value = e;
+                e = null;
+            }
+
             if (typeof value === 'string') { value = [value]; }
 
             var that = this,
@@ -380,7 +385,12 @@
                 msIds = $.map(value, function (val) { return (that.sanitize(val)); }),
                 selectables = this.$selectableUl.find('#' + msIds.join('-selectable, #') + '-selectable').filter(':not(.' + that.options.disabledClass + ')'),
                 selections = this.$selectionUl.find('#' + msIds.join('-selection, #') + '-selection').filter(':not(.' + that.options.disabledClass + ')'),
-                options = ms.find('option:not(:disabled)').filter(function () { return ($.inArray(this.value, value) > -1); });
+                options = ms.find('option:not(:disabled)').filter(function () { return ($.inArray(this.value, value) > -1); }),
+                event = e !== null && typeof e.currentTarget !== "undefined" ? e.currentTarget : null;
+
+            if (method !== 'init' && typeof that.options.beforeSelect === 'function') {
+                that.options.beforeSelect(event, value, quicksearchCacheOptions);
+            }
 
             if (method === 'init') {
                 selectables = this.$selectableUl.find('#' + msIds.join('-selectable, #') + '-selectable'),
@@ -428,7 +438,12 @@
             }
         },
 
-        'deselect': function (value, quicksearchCacheOptions) {
+        'deselect': function (e, value, quicksearchCacheOptions) {
+            if (e !== null && (typeof e === 'string' || typeof e.concat === 'function')) {
+                value = e;
+                e = null;
+            }
+
             if (typeof value === 'string') { value = [value]; }
 
             var that = this,
@@ -436,7 +451,12 @@
                 msIds = $.map(value, function (val) { return (that.sanitize(val)); }),
                 selectables = this.$selectableUl.find('#' + msIds.join('-selectable, #') + '-selectable'),
                 selections = this.$selectionUl.find('#' + msIds.join('-selection, #') + '-selection').filter('.ms-selected').filter(':not(.' + that.options.disabledClass + ')'),
-                options = ms.find('option').filter(function () { return ($.inArray(this.value, value) > -1); });
+                options = ms.find('option').filter(function () { return ($.inArray(this.value, value) > -1); }),
+                event = e !== null && typeof e.currentTarget !== "undefined" ? e.currentTarget : null;
+
+            if (typeof that.options.beforeDeselect === 'function') {
+                that.options.beforeDeselect(event, value, quicksearchCacheOptions);
+            }
 
             if (selections.length > 0) {
                 selectables.removeClass('ms-selected').show();
